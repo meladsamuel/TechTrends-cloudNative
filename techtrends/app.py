@@ -2,12 +2,26 @@ import sqlite3
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
+from datetime import datetime
+import logging
+
+# Store the total amount of connections to the database
+db_connection_count = 0
+
+logging.basicConfig(level=logging.DEBUG)
+
+# Get the current formated date time
+def get_current_date_time():
+    current = datetime.now()
+    return current.strftime("%d/%m/%Y, %H:%M:%S")
 
 # Function to get a database connection.
 # This function connects to database with the name `database.db`
 def get_db_connection():
     connection = sqlite3.connect('database.db')
     connection.row_factory = sqlite3.Row
+    global db_connection_count
+    db_connection_count += 1
     return connection
 
 # Function to get a post using its ID
@@ -36,13 +50,16 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
+      app.logger.debug("{}, A non-existing article is accessed and a 404 page is returned".format(get_current_date_time()))
       return render_template('404.html'), 404
     else:
+      app.logger.debug("{}, Artical \"{}\" retrieved!".format(get_current_date_time(), post['title']))
       return render_template('post.html', post=post)
 
 # Define the About Us page
 @app.route('/about')
 def about():
+    app.logger.debug("{}, The \"About US\" page is retrieved".format(get_current_date_time()))
     return render_template('about.html')
 
 # Define the post creation functionality 
@@ -60,10 +77,27 @@ def create():
                          (title, content))
             connection.commit()
             connection.close()
-
+            app.logger.debug("{}, Artical \"{}\" created!".format(get_current_date_time(), title))
             return redirect(url_for('index'))
 
     return render_template('create.html')
+
+# Define the endpoint to check if the system is up and running
+@app.route('/healthz')
+def check_healthz():
+    return jsonify({"result": "OK - healthy"})
+
+# Define metrics route to display the metrics information about the appliction
+@app.route('/metrics')
+def get_metrics():
+    response = {}
+    connection = get_db_connection()
+    response['db_connection_count'] = db_connection_count;
+    response['post_count'] = connection.execute('SELECT COUNT(*) FROM posts').fetchone()[0]
+    connection.commit()
+    connection.close()
+    return jsonify(response) 
+
 
 # start the application on port 3111
 if __name__ == "__main__":
