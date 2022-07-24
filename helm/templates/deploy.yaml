@@ -30,7 +30,7 @@ spec:
         - containerPort: {{ .Values.containerPort }}
         livenessProbe:
           httpGet:
-            path: {{ .Values.livesnessProbe.path }}
+            path: {{ .Values.livenessProbe.path }}
             port: {{ .Values.containerPort }}
             httpHeaders:
             - name: Accept
