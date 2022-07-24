@@ -85,7 +85,14 @@ def create():
 # Define the endpoint to check if the system is up and running
 @app.route('/healthz')
 def check_healthz():
-    return jsonify({"result": "OK - healthy"})
+    try: 
+        connection = get_db_connection()
+        connection.execute("SELECT ACK as status;")
+        connection.commit()
+        connection.close()
+        return jsonify({"result": "OK - healthy"})
+    except:
+        return jsonify({"resutl": "ERROR - unhealthy"})
 
 # Define metrics route to display the metrics information about the appliction
 @app.route('/metrics')
