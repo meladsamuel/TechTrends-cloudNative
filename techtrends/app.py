@@ -50,7 +50,7 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
-      app.logger.debug("{}, A non-existing article is accessed and a 404 page is returned".format(get_current_date_time()))
+      app.logger.error("{}, A non-existing article is accessed and a 404 page is returned".format(get_current_date_time()))
       return render_template('404.html'), 404
     else:
       app.logger.debug("{}, Artical \"{}\" retrieved!".format(get_current_date_time(), post['title']))
@@ -71,6 +71,7 @@ def create():
 
         if not title:
             flash('Title is required!')
+	    app.logger.error("{}, Title is required!".format(get_current_date_time()))
         else:
             connection = get_db_connection()
             connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)',
