@@ -31,7 +31,7 @@ spec:
         livenessProbe:
           httpGet:
             path: {{ .Values.livenessProbe.path }}
-            port: {{ .Values.containerPort }}
+            port: {{ .Values.livenessProbe.port }}
             httpHeaders:
             - name: Accept
               value: application/json
@@ -40,7 +40,7 @@ spec:
         readinessProbe:
           httpGet:
             path: {{ .Values.readinessProbe.path }}
-            port: {{ .Values.containerPort }}
+            port: {{ .Values.readinessProbe.port }}
             httpHeaders:
             - name: Accept
               value: application/json
