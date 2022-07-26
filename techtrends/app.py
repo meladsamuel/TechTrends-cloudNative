@@ -4,11 +4,16 @@ from flask import Flask, jsonify, json, render_template, request, url_for, redir
 from werkzeug.exceptions import abort
 from datetime import datetime
 import logging
+import sys
+
 
 # Store the total amount of connections to the database
 db_connection_count = 0
 
-logging.basicConfig(level=logging.DEBUG)
+stdout_handler = logging.StreamHandler(sys.stdout)
+stderr_handler = logging.StreamHandler(sys.stderr)
+handlers = [stdout_handler, stderr_handler]
+logging.basicConfig(handlers=handlers, level=logging.DEBUG)
 
 # Get the current formated date time
 def get_current_date_time():
