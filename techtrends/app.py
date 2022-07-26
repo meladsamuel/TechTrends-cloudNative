@@ -41,7 +41,7 @@ def get_post(post_id):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your secret key'
 
-# Define the main route of the web application 
+# Define the main route of the web application
 @app.route('/')
 def index():
     connection = get_db_connection()
@@ -49,17 +49,17 @@ def index():
     connection.close()
     return render_template('index.html', posts=posts)
 
-# Define how each individual article is rendered 
+# Define how each individual article is rendered
 # If the post ID is not found a 404 page is shown
 @app.route('/<int:post_id>')
 def post(post_id):
     post = get_post(post_id)
     if post is None:
-      app.logger.error("{}, A non-existing article is accessed and a 404 page is returned".format(get_current_date_time()))
-      return render_template('404.html'), 404
+        app.logger.error("{}, A non-existing article is accessed and a 404 page is returned".format(get_current_date_time()))
+        return render_template('404.html'), 404
     else:
-      app.logger.debug("{}, Artical \"{}\" retrieved!".format(get_current_date_time(), post['title']))
-      return render_template('post.html', post=post)
+        app.logger.debug("{}, Artical \"{}\" retrieved!".format(get_current_date_time(), post['title']))
+        return render_template('post.html', post=post)
 
 # Define the About Us page
 @app.route('/about')
@@ -67,7 +67,7 @@ def about():
     app.logger.debug("{}, The \"About US\" page is retrieved".format(get_current_date_time()))
     return render_template('about.html')
 
-# Define the post creation functionality 
+# Define the post creation functionality
 @app.route('/create', methods=('GET', 'POST'))
 def create():
     if request.method == 'POST':
@@ -75,12 +75,11 @@ def create():
         content = request.form['content']
 
         if not title:
+            app.logger.error("{}, Title is required!".format(get_current_date_time()))
             flash('Title is required!')
-	    app.logger.error("{}, Title is required!".format(get_current_date_time()))
         else:
             connection = get_db_connection()
-            connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)',
-                         (title, content))
+            connection.execute('INSERT INTO posts (title, content) VALUES (?, ?)', (title, content))
             connection.commit()
             connection.close()
             app.logger.debug("{}, Artical \"{}\" created!".format(get_current_date_time(), title))
@@ -91,7 +90,7 @@ def create():
 # Define the endpoint to check if the system is up and running
 @app.route('/healthz')
 def check_healthz():
-    try: 
+    try:
         connection = get_db_connection()
         connection.execute("SELECT ACK as status;")
         connection.commit()
@@ -109,9 +108,9 @@ def get_metrics():
     response['post_count'] = connection.execute('SELECT COUNT(*) FROM posts').fetchone()[0]
     connection.commit()
     connection.close()
-    return jsonify(response) 
+    return jsonify(response)
 
 
 # start the application on port 3111
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', port='3111')
+    app.run(host='0.0.0.0', port='3111')
